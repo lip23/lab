@@ -362,6 +362,10 @@ pte_t *
 pgdir_walk(pde_t *pgdir, const void *va, int create)
 {
 	// Fill this function in
+    // *pgdir是页目录(page directory),即一级页表，pgdir使用的是虚拟地址，因为这时
+    // 已经开启了分页，对地址进行读写都要经过页地址转换
+    // 但我们把pgdir的地址给到寄存器时要用物理地址
+    // *pde是页目录项(page directory entry)，其中保存的二级页表的物理地址
     pde_t *pde = pgdir + PDX(va);
     if (0 == *pde && true == create) {
         struct PageInfo *pg = page_alloc(ALLOC_ZERO);
@@ -369,25 +373,18 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
             return NULL;
         }
         ++(pg->pp_ref);
-        *pde = page2pa(pg);
+        *pde = (uintptr_t)page2pa(pg) + PTE_P + PTE_W ;
     }
     if (0 == *pde) {
         return NULL;
     }
+    // *pgtab是二级页表（page table）
     pte_t *pgtab = (pte_t*)(*pde);
+    // *pte是页表项(page table entry),其中保存的物理页地址，
+    // 因为*pde中保存的是物理地址，所以当前求得的pte也是物理地址
     pte_t *pte = pgtab + PTX(va);
-    /*
-    if (0 == *pte &&create) {
-        struct PageInfo *pg = page_alloc(ALLOC_ZERO);
-        if (NULL == pg) {
-            return NULL:
-        }
-        ++(pg->pp_ref);
-        *pte = page2pa(pg);
-        return pte;
-    }
-    */
-	return pte;
+    // 因为当前已经开启分页，所以未来能争取对pte所指的物理地址进行读写，要返回去对应的虚拟地址
+	return (pte_t*)((uintptr_t)pte + KERNBASE);
 }
 
 //
@@ -441,8 +438,7 @@ page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
     if (NULL == pte) {
         return -E_NO_MEM;
     }
-    *pte = page2pa(pp);
-    *pte |= (perm | PTE_P);
+    *pte = page2pa(pp) | perm | PTE_P;
     ++pp->pp_ref;
 	return 0;
 }
