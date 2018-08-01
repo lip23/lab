@@ -379,7 +379,7 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
         return NULL;
     }
     // *pgtab是二级页表（page table）
-    pte_t *pgtab = (pte_t*)(*pde);
+    pte_t *pgtab = (pte_t*)(*pde & ~0xfff);
     // *pte是页表项(page table entry),其中保存的物理页地址，
     // 因为*pde中保存的是物理地址，所以当前求得的pte也是物理地址
     pte_t *pte = pgtab + PTX(va);
@@ -493,9 +493,6 @@ page_remove(pde_t *pgdir, void *va)
         return;
     }
     page_decref(pg);
-    if (NULL == pte) {
-        return;
-    }
     *pte = (pte_t)NULL;
 }
 
