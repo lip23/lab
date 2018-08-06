@@ -409,10 +409,11 @@ static void
 boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm)
 {
 	// Fill this function in
-    uintptr_t va_end = va + size;
-    while (va < va_end) {
-      cprintf("va=%x\n",va);
+    uint32_t page_num = ROUNDUP(size, PGSIZE) / PGSIZE;
+    while (page_num--) {
+      //cprintf("va=%x\n",va);
       pte_t *pte = pgdir_walk(pgdir, (void*)va, true);
+      pgdir[PDX(va)] |= PTE_P | perm;
       assert(pte != NULL);
       *pte = pa | PTE_P | perm;
       va += PGSIZE;
