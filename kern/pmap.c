@@ -512,6 +512,8 @@ page_remove(pde_t *pgdir, void *va)
     if (NULL == pg) {
         return;
     }
+    // 因为少调用了这个函数，查2了两个小时的问题，主要原因还是对tlb不熟悉
+    tlb_invalidate(pgdir, va);
     page_decref(pg);
     *pte = (pte_t)NULL;
 }
