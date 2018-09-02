@@ -231,6 +231,8 @@ mem_init(void)
 	//
 	// If the machine reboots at this point, you've probably set up your
 	// kern_pgdir wrong.
+    // cr3寄存器用来保存pgdir的物理地址
+    // cr0寄存器可以控制是否开启分页
 	lcr3(PADDR(kern_pgdir));
 
 	check_page_free_list(0);
