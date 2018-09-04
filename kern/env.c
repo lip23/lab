@@ -353,7 +353,7 @@ load_icode(struct Env *e, uint8_t *binary)
     if (ELF_MAGIC != elf_hdr->e_magic) {
         panic("load_icode: elf->emagic error\n");
     }
-    struct Proghdr *ph = (struct Proghdr *)elf_hdr->e_phoff;
+    struct Proghdr *ph = (struct Proghdr *)(binary + elf_hdr->e_phoff);
     struct Proghdr *ph_end = ph + elf_hdr->e_phnum;
     lcr3(PADDR(e->env_pgdir));
     while (ph < ph_end) {
@@ -374,7 +374,7 @@ load_icode(struct Env *e, uint8_t *binary)
         panic("load_icode: page_alloc for stack == NULL\n");
     }
     void * us_va = (void *) USTACKTOP - PGSIZE;
-    if (page_insert(e->env_pgdir, us_va, p, PTE_U | PTE_W) < 0) {
+    if (page_insert(e->env_pgdir, p, us_va, PTE_U | PTE_W) < 0) {
         panic("load_icode: page_insert for stack < 0 \n");
     }
 }
