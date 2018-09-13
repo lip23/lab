@@ -470,6 +470,10 @@ env_destroy(struct Env *e)
 //
 // This function does not return.
 //
+// 因为di寄存器通常用来保存函数的第一个参数，但实际在函数调用中并不一定将
+// 第一个参数放到di中
+// 这里将输入寄存器标识改为‘D'，表示使用di寄存器。显示将tf的值指定给
+// 寄存器di，可以保证di的值一定是tf
 void
 env_pop_tf(struct Trapframe *tf)
 {
@@ -480,7 +484,7 @@ env_pop_tf(struct Trapframe *tf)
 		"\tpopl %%ds\n"
 		"\taddl $0x8,%%esp\n" /* skip tf_trapno and tf_errcode */
 		"\tiret\n"
-		: : "g" (tf) : "memory");
+		: : "D" (tf) : "memory");
 	panic("iret failed");  /* mostly to placate the compiler */
 }
 
