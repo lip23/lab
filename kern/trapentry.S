@@ -25,7 +25,7 @@
 	.type name, @function;	/* symbol type is function */		\
 	.align 2;		/* align function definition */		\
 	name:			/* function starts here */		\
-	pushl $(num);							\
+	pushl $(num);	/* tf_trapno */				\
 	jmp _alltraps
 
 /* Use TRAPHANDLER_NOEC for traps where the CPU doesn't push an error code.
@@ -37,8 +37,8 @@
 	.type name, @function;						\
 	.align 2;							\
 	name:								\
-	pushl $0;							\
-	pushl $(num);							\
+	pushl $0;		/* tf_err */			\
+	pushl $(num);	/* tf_trapno */				\
 	jmp _alltraps
 
 .text
@@ -47,9 +47,30 @@
  * Lab 3: Your code here for generating entry points for the different traps.
  */
 
+/* handle divide error */
+TRAPHANDLER(handler1, T_DIVIDE)
+
+/* handle system call */
+TRAPHANDLER_NOEC(handler48, T_SYSCALL)
+
+
 
 
 /*
  * Lab 3: Your code here for _alltraps
+ * Your _alltraps should:
+
+ * 1.push values to make the stack look like a struct Trapframe
+ * 2.load GD_KD into %ds and %es
+ * 3.pushl %esp to pass a pointer to the Trapframe as an argument to trap()
+ * 4.call trap (can trap ever return?)
  */
 
+_alltraps:
+  pushl %ds # tf_ds
+  pushl %es # tf_es
+  pushal # tf_regs
+  movw $GD_KD, %ax
+  movw %ax, %ds
+  movw %ax, %es
+  call trap
