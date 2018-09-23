@@ -47,8 +47,9 @@
  * Lab 3: Your code here for generating entry points for the different traps.
  */
 
-/* handle divide error */
-TRAPHANDLER(handler1, T_DIVIDE)
+/* handle divide error 
+   除零错误cpu不会自动压人错误码*/
+TRAPHANDLER_NOEC(handler1, T_DIVIDE)
 
 /* handle system call */
 TRAPHANDLER_NOEC(handler48, T_SYSCALL)
@@ -73,4 +74,5 @@ _alltraps:
   movw $GD_KD, %ax
   movw %ax, %ds
   movw %ax, %es
+  pushl %esp # 入参
   call trap
