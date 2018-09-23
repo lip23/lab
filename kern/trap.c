@@ -26,6 +26,7 @@ struct Pseudodesc idt_pd = {
 };
 
 extern void handler1(void);
+extern void handler13(void);
 extern void handler48(void);
 
 
@@ -71,6 +72,7 @@ trap_init(void)
     SETGATE(idt[0], 0, GD_KT, (uint32_t)handler1, 0);
     // 之前用的是SETCALLGATE宏，然后到了int 0x30指令就出错，
     // 调试了将近一周，还是文档不熟悉呀
+    SETGATE(idt[13], 0, GD_KT, (uint32_t)handler13, 0);
     SETGATE(idt[48], 1, GD_KT, (uint32_t)handler48, 3);
 
 	// Per-CPU setup

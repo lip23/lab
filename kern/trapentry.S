@@ -51,6 +51,7 @@
    除零错误cpu不会自动压人错误码*/
 TRAPHANDLER_NOEC(handler1, T_DIVIDE)
 
+TRAPHANDLER(handler13, T_GPFLT)
 /* handle system call */
 TRAPHANDLER_NOEC(handler48, T_SYSCALL)
 
