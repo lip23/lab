@@ -26,7 +26,9 @@ struct Pseudodesc idt_pd = {
 };
 
 extern void handler1(void);
+extern void handler3(void);
 extern void handler13(void);
+extern void handler14(void);
 extern void handler48(void);
 
 
@@ -70,9 +72,11 @@ trap_init(void)
 
 	// LAB 3: Your code here.
     SETGATE(idt[0], 0, GD_KT, (uint32_t)handler1, 0);
+    SETGATE(idt[3], 1, GD_KT, (uint32_t)handler3, 3);
     // 之前用的是SETCALLGATE宏，然后到了int 0x30指令就出错，
     // 调试了将近一周，还是文档不熟悉呀
     SETGATE(idt[13], 0, GD_KT, (uint32_t)handler13, 0);
+    SETGATE(idt[14], 0, GD_KT, (uint32_t)handler14, 0);
     SETGATE(idt[48], 1, GD_KT, (uint32_t)handler48, 3);
 
 	// Per-CPU setup
@@ -153,6 +157,16 @@ trap_dispatch(struct Trapframe *tf)
 {
 	// Handle processor exceptions.
 	// LAB 3: Your code here.
+    switch (tf->tf_trapno) {
+        case T_PGFLT:
+            page_fault_handler(tf);
+            break;
+        case T_BRKPT:
+            monitor(tf);
+            break;
+        default:
+            break;
+    }
 
 	// Unexpected trap: The user process or the kernel has a bug.
 	print_trapframe(tf);
@@ -164,6 +178,7 @@ trap_dispatch(struct Trapframe *tf)
 	}
 }
 
+// trap函数的作用：
 void
 trap(struct Trapframe *tf)
 {

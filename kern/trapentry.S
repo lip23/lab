@@ -50,8 +50,9 @@
 /* handle divide error 
    除零错误cpu不会自动压人错误码*/
 TRAPHANDLER_NOEC(handler1, T_DIVIDE)
-
+TRAPHANDLER_NOEC(handler3, T_BRKPT)
 TRAPHANDLER(handler13, T_GPFLT)
+TRAPHANDLER(handler14, T_PGFLT)
 /* handle system call */
 TRAPHANDLER_NOEC(handler48, T_SYSCALL)
 
