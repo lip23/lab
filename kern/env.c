@@ -359,8 +359,9 @@ load_icode(struct Env *e, uint8_t *binary)
     while (ph < ph_end) {
         if (ELF_PROG_LOAD == ph->p_type) {
             region_alloc(e, (void *)ph->p_va, ph->p_memsz);
-            memcpy((void *)ph->p_va, binary + ph->p_offset, ph->p_memsz);
-            memset((void *)ph->p_va + ph->p_memsz, ph->p_memsz - ph->p_filesz, 0);
+            // 注：memsz > filesz ！！！！！！！！！！！！！！！！！！
+            memcpy((void *)ph->p_va, binary + ph->p_offset, ph->p_filesz);
+            memset((void *)ph->p_va + ph->p_filesz, 0, ph->p_memsz - ph->p_filesz);
         }
         ++ph;
     }
