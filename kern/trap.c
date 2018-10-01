@@ -157,6 +157,7 @@ trap_dispatch(struct Trapframe *tf)
 {
 	// Handle processor exceptions.
 	// LAB 3: Your code here.
+    struct PushRegs *rg = &(tf->tf_regs);
     switch (tf->tf_trapno) {
         case T_PGFLT:
             page_fault_handler(tf);
@@ -164,6 +165,10 @@ trap_dispatch(struct Trapframe *tf)
         case T_BRKPT:
             monitor(tf);
             break;
+        case T_SYSCALL:
+            //struct PushRegs *rg = &(tf->tf_regs);
+            rg->reg_eax = syscall(rg->reg_eax, rg->reg_edx, rg->reg_ecx, rg->reg_ebx, rg->reg_edi, rg->reg_esi);
+            return;
         default:
             break;
     }
