@@ -574,7 +574,27 @@ int
 user_mem_check(struct Env *env, const void *va, size_t len, int perm)
 {
 	// LAB 3: Your code here.
-
+    void *va_beg = (void*)va;
+    void *va_end = ROUNDUP((void*)va + len, PGSIZE);
+    while(va_beg < va_end) {
+        //pde_t *pde = env->env_pgdir + PDX(va_beg);
+        //if ((perm & (*pde)) != perm) {
+        //    return -E_FAULT;
+        //}
+        pte_t *pte = NULL;
+        page_lookup(env->env_pgdir, va_beg, &pte);
+        if (pte == NULL || (perm & (*pte)) != perm) {
+            user_mem_check_addr = (uintptr_t)va_beg;
+            // 在进行page权限检查时，是从va开始，然后每次增加一个PGSIZE大小
+            // 又因为user_mem_check_addr要保存所第一个查询失败的地址
+            // 所以当user_mem_check_addr > va 时，要取当前页面的起始地址
+            if (user_mem_check_addr > (uintptr_t)va) {
+                user_mem_check_addr = ROUNDDOWN(user_mem_check_addr, PGSIZE);
+            }
+            return -E_FAULT;
+        }
+        va_beg += PGSIZE;
+    }
 	return 0;
 }
 
